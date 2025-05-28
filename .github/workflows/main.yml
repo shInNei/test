@@ -23,10 +23,6 @@ jobs:
         cd frontend
         flutter build apk --release
 
-    - name: Zip source code
-      run: |
-        zip -r source.zip frontend -x "**/build/**" "**/.dart_tool/**" "**/.git/**" "**/.idea/**"
-
     - name: Upload Release to GitHub
       uses: softprops/action-gh-release@v1
       with:
@@ -34,14 +30,15 @@ jobs:
         name: Release v1.0.${{ github.run_number }}
         files: |
           frontend/build/app/outputs/flutter-apk/app-release.apk
-          source.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Bump version and push tag
-      id: bump-version
-      uses: phips28/gh-action-bump-version@v9.0.3
-      with:
-        commit-message: "ci: bump version to {{version}}"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Bump pubspec.yaml version
+      run: |
+        cd frontend
+        sed -i 's/^version: .*/version: 1.0.${{ github.run_number }}/' pubspec.yaml
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git commit -am "ci: bump version to 1.0.${{ github.run_number }}"
+        git tag "v1.0.${{ github.run_number }}"
+        git push origin --tags
