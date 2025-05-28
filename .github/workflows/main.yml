@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      VERSION_FILE: app/build.gradle  # Adjust if you're using different build config
+      VERSION_FILE: frontend/app/build.gradle # Adjust if you're using different build config
 
     steps:
     - name: Checkout Code
