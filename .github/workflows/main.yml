@@ -9,33 +9,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      VERSION_FILE: frontend/app/build.gradle # Adjust if you're using different build config
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
       with:
-        distribution: 'temurin'
-        java-version: '17'
+        flutter-version: '3.29.0'
 
-    - name: Build APK
-      run: ./gradlew assembleRelease
-
-    - name: Zip Source Code
+    - name: Build release APK
       run: |
-        zip -r source.zip . -x "*.git*" "*/build/*" "*.gradle*" "*.idea*" "*.iml" "*.apk"
+        cd frontend
+        flutter build apk --release
+
+    - name: Zip source code
+      run: |
+        zip -r source.zip frontend -x "**/build/**" "**/.dart_tool/**" "**/.git/**" "**/.idea/**"
 
     - name: Upload Release to GitHub
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.VERSION_TAG }}
-        name: Release ${{ env.VERSION_TAG }}
+        tag_name: "v1.0.${{ github.run_number }}"
+        name: Release v1.0.${{ github.run_number }}
         files: |
-          app/build/outputs/apk/release/app-release.apk
+          frontend/build/app/outputs/flutter-apk/app-release.apk
           source.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
